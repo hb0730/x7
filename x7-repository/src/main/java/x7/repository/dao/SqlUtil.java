@@ -60,7 +60,7 @@ public class SqlUtil {
             /*
              * 处理KEY
              */
-//            Object value = keyOneF.get(obj);
+            Object value = keyOneF.get(obj);
 
             pstmt.setObject(i++, obj);
         }catch (Exception e){
