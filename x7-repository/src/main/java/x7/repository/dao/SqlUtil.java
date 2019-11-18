@@ -52,7 +52,6 @@ public class SqlUtil {
         }catch (Exception e) {
             throw new PersistenceException(ExceptionUtil.getMessage(e));
         }
-
     }
 
     protected static void adpterSqlKey(PreparedStatement pstmt, Field keyOneF, Object obj, int i){
