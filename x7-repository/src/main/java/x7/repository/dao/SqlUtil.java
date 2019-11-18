@@ -60,9 +60,9 @@ public class SqlUtil {
             /*
              * 处理KEY
              */
-            Object value = keyOneF.get(obj);
+//            Object value = keyOneF.get(obj);
 
-            pstmt.setObject(i++, value);
+            pstmt.setObject(i++, obj);
         }catch (Exception e){
             throw new PersistenceException(ExceptionUtil.getMessage(e));
         }
