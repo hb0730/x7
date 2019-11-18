@@ -57,11 +57,6 @@ public class SqlUtil {
 
     protected static void adpterSqlKey(PreparedStatement pstmt, Field keyOneF, Object obj, int i){
         try {
-            /*
-             * 处理KEY
-             */
-            Object value = keyOneF.get(obj);
-
             pstmt.setObject(i++, obj);
         }catch (Exception e){
             throw new PersistenceException(ExceptionUtil.getMessage(e));
