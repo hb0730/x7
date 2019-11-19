@@ -22,6 +22,7 @@ import io.xream.x7.reyc.internal.HttpClientResolver;
 import io.xream.x7.reyc.internal.HttpClientProperies;
 import io.xream.x7.reyc.internal.ReyClientProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
@@ -35,6 +36,7 @@ public class ReyClientConfig {
 
     }
 
+    @ConditionalOnMissingBean(ReyTracing.class)
     @ConditionalOnBean({BraveHttpRequestInterceptor.class,BraveHttpResponseInterceptor.class})
     @Bean
     public ReyTracing enableReyTracing(BraveHttpRequestInterceptor req,BraveHttpResponseInterceptor rep){

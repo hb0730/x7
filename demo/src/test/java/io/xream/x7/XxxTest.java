@@ -163,22 +163,22 @@ public class XxxTest {
         refreshCondition.refresh("isCat",true).and().eq("id",5);
 
 
-        String str =this.reyTemplate.support(null, false,
-                new BackendService() {
-                    @Override
-                    public String handle() {
-                        return HttpClientUtil.post("http://127.0.0.1:8868/xxx/refreshCondition/test",refreshCondition);
-                    }
-
-                    @Override
-                    public Object fallback() {
-                        System.out.println("FALL BACK TEST");
-                        return null;
-                    }
-                });
-
-        return ViewEntity.ok(str);
-//        return testServiceRemote.testRefreshConditionn(refreshCondition);
+//        String str =this.reyTemplate.support(null, false,
+//                new BackendService() {
+//                    @Override
+//                    public String handle() {
+//                        return HttpClientUtil.post("http://127.0.0.1:8868/xxx/refreshCondition/test",refreshCondition);
+//                    }
+//
+//                    @Override
+//                    public Object fallback() {
+//                        System.out.println("FALL BACK TEST");
+//                        return null;
+//                    }
+//                });
+//
+//        return ViewEntity.ok(str);
+        return testServiceRemote.testRefreshConditionn(refreshCondition);
     }
 
 
