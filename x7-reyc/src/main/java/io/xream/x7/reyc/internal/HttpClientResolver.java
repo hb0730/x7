@@ -170,14 +170,11 @@ public class HttpClientResolver {
     }
 
 
-    protected static String wrap(HttpClientProxy proxy, String methodName, BackendService backendService) {
+    protected static String wrap(HttpClientProxy proxy, BackendService backendService) {
 
         String backend = proxy.getBackend();
 
-        final String intfName = proxy.getObjectType().getName();
-        final String tag = intfName + "." + methodName;
-
-        String result = reyTemplate.support(backend,proxy.isRetry(),tag,backendService);
+        String result = reyTemplate.support(backend,proxy.isRetry(),backendService);
 
         return result;
     }

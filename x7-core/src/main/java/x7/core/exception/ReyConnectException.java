@@ -1,8 +1,8 @@
 package x7.core.exception;
 
-public class ReyClientConnectException extends RuntimeException {
+public class ReyConnectException extends RuntimeException {
 
-    public ReyClientConnectException(String message){
+    public ReyConnectException(String message){
         super(message);
     }
 

@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import x7.core.exception.BusyException;
 import x7.core.exception.RemoteServiceException;
-import x7.core.exception.ReyClientConnectException;
+import x7.core.exception.ReyConnectException;
 import x7.core.util.StringUtil;
 
 import java.util.function.Supplier;
@@ -46,7 +46,7 @@ public class R4JTemplate implements ReyTemplate {
     }
 
     @Override
-    public String support(String circuitBreakerKey, boolean isRetry, String logTag, BackendService backendService) {
+    public String support(String circuitBreakerKey, boolean isRetry, BackendService backendService) {
 
         if (StringUtil.isNullOrEmpty(circuitBreakerKey)){
             circuitBreakerKey = "";
@@ -66,7 +66,7 @@ public class R4JTemplate implements ReyTemplate {
                         .onRetry(event -> {
                             if (logger.isDebugEnabled()) {
                                 logger.debug(event.getEventType().toString() + "_" + event.getNumberOfRetryAttempts() + ": backend("
-                                        + backendName +") : "+ logTag);
+                                        + backendName +")");
                             }
                         });
 
@@ -75,7 +75,7 @@ public class R4JTemplate implements ReyTemplate {
             }
         }
 
-        String logStr = "Backend("+ backendName +") of " + logTag;
+        String logStr = "Backend("+ backendName +")";
 
         String result = Try.ofSupplier(decoratedSupplier)
                 .recover(e ->
@@ -110,7 +110,7 @@ public class R4JTemplate implements ReyTemplate {
                 logger.error(tag + " : " + e.getMessage());
             }
             Object obj = backendService.fallback();
-            throw new ReyClientConnectException(tag + " : " + e.getMessage() + (obj == null ? "" : (" : " + obj.toString())));
+            throw new ReyConnectException(tag + " : " + e.getMessage() + (obj == null ? "" : (" : " + obj.toString())));
         }
 
         if (e instanceof RuntimeException) {

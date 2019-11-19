@@ -43,7 +43,7 @@ public class HttpClientInvocationHandler implements InvocationHandler {
                 return HttpClientResolver.toObject(r.getReturnType(),r.getGeneType(),result);
             }
 
-            String result = HttpClientResolver.wrap(httpClientProxy, methodName, new BackendService() {
+            String result = HttpClientResolver.wrap(httpClientProxy, new BackendService() {
                 @Override
                 public String handle() {
                     return HttpClientResolver.resolve(r);

@@ -163,7 +163,7 @@ public class XxxTest {
         refreshCondition.refresh("isCat",true).and().eq("id",5);
 
 
-        String str =this.reyTemplate.support(null, false, "XxxTest.testRefreshCondition",
+        String str =this.reyTemplate.support(null, false,
                 new BackendService() {
                     @Override
                     public String handle() {

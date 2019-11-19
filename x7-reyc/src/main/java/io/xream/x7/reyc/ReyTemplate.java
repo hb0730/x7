@@ -18,5 +18,5 @@ package io.xream.x7.reyc;
 
 public interface ReyTemplate {
 
-    String support(String circuitBreakerKey, boolean isRetry, String logTag, BackendService service);
+    String support(String circuitBreakerKey, boolean isRetry, BackendService service);
 }
