@@ -19,7 +19,6 @@ import x7.*;
 @EnableTracingServlet
 @EnableCorsConfig
 @EnableDateToLongForJackson
-@EnableSchemaTransform
 //@EnableX7L3Caching
 public class App {
     public static void main( String[] args )
@@ -27,38 +26,6 @@ public class App {
     	SpringApplication.run(App.class);
     }
 
-
-//    @Bean
-//    public SchemaTransformCustomizer schemaTransformCustomizer(){
-//
-//        SchemaTransformCustomizer schemaTransformCustomizer = new SchemaTransformCustomizer() {
-//            @Override
-//            public List<Class<? extends BaseRepository>> customizer(SchemaTransformRepositoryBuilder builder) {
-//
-//                List<Class<? extends BaseRepository>> list = new ArrayList<>();
-//                Class<? extends BaseRepository> clzz = builder.build(PigRepository.class);
-//                list.add(clzz);
-//
-//                return list;
-//            }
-//        };
-//
-//        return schemaTransformCustomizer;
-//    }
-
-//    @Bean
-//    public IdGeneratorPolicyCustomizer idGeneratorPolicyCustomizer(){
-//
-//        return new IdGeneratorPolicyCustomizer() {
-//            @Override
-//            public IdGeneratorPolicy customizer() {
-//
-//                IdGeneratorPolicy idGeneratorPolicy = null;
-//
-//                return idGeneratorPolicy;
-//            }
-//        };
-//    }
 
 
 }

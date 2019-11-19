@@ -18,24 +18,14 @@ package io.xream.x7.reyc.internal;
 
 import com.github.kristofa.brave.httpclient.BraveHttpRequestInterceptor;
 import com.github.kristofa.brave.httpclient.BraveHttpResponseInterceptor;
-import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerOpenException;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
-import io.github.resilience4j.retry.Retry;
-import io.github.resilience4j.retry.RetryRegistry;
-import io.vavr.control.Try;
-import io.xream.x7.reyc.ReyClient;
-import io.xream.x7.reyc.TracingConfig;
-import io.xream.x7.reyc.Url;
+import io.xream.x7.reyc.*;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestMethod;
 import x7.core.bean.KV;
-import x7.core.exception.BusyException;
 import x7.core.exception.RemoteServiceException;
-import x7.core.exception.ReyClientConnectException;
 import x7.core.util.HttpClientUtil;
 import x7.core.util.JsonX;
 import x7.core.util.StringUtil;
@@ -43,17 +33,14 @@ import x7.core.util.StringUtil;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
-public class ClientResolver {
+public class HttpClientResolver {
 
 
     private static Logger logger = LoggerFactory.getLogger(ReyClient.class);
 
-    private static CircuitBreakerRegistry circuitBreakerRegistry;
-    private static RetryRegistry retryRegistry;
-
+    private static ReyTemplate reyTemplate;
 
     private static BraveHttpRequestInterceptor requestInterceptor;
     private static BraveHttpResponseInterceptor responseInterceptor;
@@ -61,12 +48,10 @@ public class ClientResolver {
     private static HttpClientProperies properies;
     private static ReyClientProperties reyClientProperties;
 
-
-    public static void init(HttpClientProperies p, ReyClientProperties reyProperties, CircuitBreakerRegistry c, RetryRegistry r) {
-        circuitBreakerRegistry = c;
+    public static void init(HttpClientProperies p,ReyClientProperties rp, ReyTemplate rt) {
         properies = p;
-        retryRegistry = r;
-        reyClientProperties = reyProperties;
+        reyClientProperties = rp;
+        reyTemplate = rt;
     }
 
     public static void initInterceptor(BraveHttpRequestInterceptor req, BraveHttpResponseInterceptor rep) {
@@ -188,83 +173,20 @@ public class ClientResolver {
     protected static String wrap(HttpClientProxy proxy, String methodName, BackendService backendService) {
 
         String backend = proxy.getBackend();
-        CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker(backend);
-
-        Supplier<String> decoratedSupplier = CircuitBreaker
-                .decorateSupplier(circuitBreaker, backendService::decorate);
 
         final String intfName = proxy.getObjectType().getName();
         final String tag = intfName + "." + methodName;
 
-        if (proxy.isRetry()) {
-            Retry retry = retryRegistry.retry(backend);
-            if (retry != null) {
-
-                retry.getEventPublisher()
-                        .onRetry(event -> {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug(event.getEventType().toString() + "_" + event.getNumberOfRetryAttempts() + ": "
-                                        + tag);
-                            }
-                        });
-
-                decoratedSupplier = Retry
-                        .decorateSupplier(retry, decoratedSupplier);
-            }
-        }
-
-        String result = Try.ofSupplier(decoratedSupplier)
-                .recover(e ->
-                        hanleException(e, tag, backendService)
-                ).get();
+        String result = reyTemplate.support(backend,proxy.isRetry(),tag,backendService);
 
         return result;
     }
 
-    /**
-     * @param e
-     * @return
-     */
-    private static String hanleException(Throwable e, String tag, BackendService backendService) {
-
-        if (e instanceof RemoteServiceException) {
-            throw (RemoteServiceException) e;
-        }
-        if (e instanceof CircuitBreakerOpenException) {
-            if (logger.isErrorEnabled()) {
-                logger.error(tag + ": " + e.getMessage());
-            }
-            Object obj = backendService.fallback();
-            throw new BusyException(obj == null ? null : obj.toString());
-        }
-
-        String str = e.toString();
-        if (str.contains("HttpHostConnectException")
-                || str.contains("ConnectTimeoutException")
-                || str.contains("ConnectException")
-        ) {
-            if (logger.isErrorEnabled()) {
-                logger.error(tag + " : " + e.getMessage());
-            }
-            Object obj = backendService.fallback();
-            throw new ReyClientConnectException(tag + " : " + e.getMessage() + (obj == null ? "" : (" : " + obj.toString())));
-        }
-
-        if (e instanceof RuntimeException) {
-            if (logger.isErrorEnabled()) {
-                logger.error(tag + " : " + e.getMessage());
-            }
-            throw new RuntimeException(tag + " : " + e.getMessage());
-        }
-
-        throw new RuntimeException(tag + " : " + e.getMessage());
-    }
 
     private static void hanleRemoteException(String result) {
 
         if (result == null)
             return;
-
 
         if (result.contains("RemoteServiceException")
                 || result.contains("RuntimeException")
@@ -305,10 +227,5 @@ public class ClientResolver {
 
     }
 
-    public interface BackendService {
-        String decorate();
-
-        Object fallback();
-    }
 
 }

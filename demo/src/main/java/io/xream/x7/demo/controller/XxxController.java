@@ -429,7 +429,8 @@ public class XxxController {
 	}
 
 	@RequestMapping("/refreshCondition/test")
-	public ViewEntity testRefreshConditionn(@RequestBody RefreshCondition refreshCondition){
+	public ViewEntity testRefreshConditionn(@RequestBody RefreshCondition<CatTest> refreshCondition){
+		this.repository.refresh(refreshCondition);
 		return ViewEntity.ok(refreshCondition);
 	}
 

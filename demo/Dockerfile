@@ -1,12 +1,12 @@
 FROM openjdk:8-jdk-alpine
 
-LABEL version="2.2.3.RELEASE"
+LABEL version="2.2.4.RELEASE"
 
 MAINTAINER Sim Wang <8966188@qq.com>
 
 ENV ACTIVE test
 
-ADD target/x7-demo-2.2.3.RELEASE.jar /data/deploy/demo/app.jar
+ADD target/x7-demo-2.2.4.RELEASE.jar /data/deploy/demo/app.jar
 
 #RUN apk add --no-cache curl
 

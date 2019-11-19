@@ -12,6 +12,7 @@ public class CatTest {
 	private String catFriendName;
 	private Timestamp time;
 	private String type;
+	private Boolean isCat;
 	public long getId() {
 		return id;
 	}
@@ -43,6 +44,14 @@ public class CatTest {
 
 	public void setType(String type) {
 		this.type = type;
+	}
+
+	public Boolean getIsCat() {
+		return isCat;
+	}
+
+	public void setIsCat(Boolean cat) {
+		isCat = cat;
 	}
 
 	@Override

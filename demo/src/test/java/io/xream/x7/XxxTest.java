@@ -6,11 +6,14 @@ import io.xream.x7.demo.bean.CatTest;
 import io.xream.x7.demo.bean.DogTest;
 import io.xream.x7.demo.controller.XxxController;
 import io.xream.x7.demo.remote.TestServiceRemote;
+import io.xream.x7.reyc.BackendService;
+import io.xream.x7.reyc.ReyTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import x7.core.bean.Criteria;
 import x7.core.bean.CriteriaBuilder;
 import x7.core.bean.condition.RefreshCondition;
+import x7.core.util.HttpClientUtil;
 import x7.core.web.Direction;
 import x7.core.web.ViewEntity;
 
@@ -19,6 +22,9 @@ import java.util.List;
 
 @Component
 public class XxxTest {
+
+    @Autowired
+    private ReyTemplate reyTemplate;
 
     @Autowired
     private TestServiceRemote testServiceRemote;
@@ -153,10 +159,26 @@ public class XxxTest {
 
     public ViewEntity testRefreshCondition(){
         RefreshCondition<CatTest> refreshCondition = new RefreshCondition<>();
-        refreshCondition.and().eq("id",10);
-        refreshCondition.refresh("id",100);
+//        refreshCondition.and().eq("id",0);
+        refreshCondition.refresh("isCat",true).and().eq("id",5);
 
-        return testServiceRemote.testRefreshConditionn(refreshCondition);
+
+        String str =this.reyTemplate.support(null, false, "XxxTest.testRefreshCondition",
+                new BackendService() {
+                    @Override
+                    public String handle() {
+                        return HttpClientUtil.post("http://127.0.0.1:8868/xxx/refreshCondition/test",refreshCondition);
+                    }
+
+                    @Override
+                    public Object fallback() {
+                        System.out.println("FALL BACK TEST");
+                        return null;
+                    }
+                });
+
+        return ViewEntity.ok(str);
+//        return testServiceRemote.testRefreshConditionn(refreshCondition);
     }
 
 

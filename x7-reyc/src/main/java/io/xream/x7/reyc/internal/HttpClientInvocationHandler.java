@@ -16,6 +16,7 @@
  */
 package io.xream.x7.reyc.internal;
 
+import io.xream.x7.reyc.BackendService;
 import x7.core.util.ExceptionUtil;
 
 import java.lang.reflect.InvocationHandler;
@@ -35,26 +36,26 @@ public class HttpClientInvocationHandler implements InvocationHandler {
 
             final String methodName = method.getName();
 
-            R r = ClientResolver.r(httpClientProxy.getObjectType().getName(),methodName,args);
+            R r = HttpClientResolver.r(httpClientProxy.getObjectType().getName(),methodName,args);
 
             if (httpClientProxy.getBackend() == null) {
-                String result = ClientResolver.resolve(r);
-                return ClientResolver.toObject(r.getReturnType(),r.getGeneType(),result);
+                String result = HttpClientResolver.resolve(r);
+                return HttpClientResolver.toObject(r.getReturnType(),r.getGeneType(),result);
             }
 
-            String result = ClientResolver.wrap(httpClientProxy, methodName, new ClientResolver.BackendService() {
+            String result = HttpClientResolver.wrap(httpClientProxy, methodName, new BackendService() {
                 @Override
-                public String decorate() {
-                    return ClientResolver.resolve(r);
+                public String handle() {
+                    return HttpClientResolver.resolve(r);
                 }
 
                 @Override
                 public Object fallback() {
-                    return ClientResolver.fallback(httpClientProxy.getObjectType().getName(),methodName,args);
+                    return HttpClientResolver.fallback(httpClientProxy.getObjectType().getName(),methodName,args);
                 }
             });
 
-            return ClientResolver.toObject(r.getReturnType(),r.getGeneType(),result);
+            return HttpClientResolver.toObject(r.getReturnType(),r.getGeneType(),result);
 
         } catch (RuntimeException re){
             throw re;
