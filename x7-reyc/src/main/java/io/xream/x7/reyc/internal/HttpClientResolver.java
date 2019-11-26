@@ -186,6 +186,9 @@ public class HttpClientResolver {
         if (result.contains("RemoteServiceException")
                 || result.contains("RuntimeException")
                 || result.contains("BizException")
+                || result.contains("BusyException")
+                || result.contains("RollbackException")
+                || result.contains("Internal Server Error")
                 || result.contains(".Exception")
                 || result.contains(".Throwable")
                 || result.contains(reyClientProperties.getRemoteException())) {

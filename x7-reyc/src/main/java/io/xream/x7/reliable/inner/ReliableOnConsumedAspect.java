@@ -19,13 +19,17 @@ package io.xream.x7.reliable.inner;
 import io.xream.x7.reliable.ReliableOnConsumed;
 import io.xream.x7.reliable.api.ReliableBackend;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
+import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import x7.core.util.ExceptionUtil;
+import x7.core.util.StringUtil;
+import x7.core.util.VerifyUtil;
 
 
 @Aspect
@@ -54,11 +58,16 @@ public class ReliableOnConsumedAspect {
 
         String svc = reliableOnConsumed.svc();
 
+        if (StringUtil.isNullOrEmpty(svc)){
+            Signature signature = proceedingJoinPoint.getSignature();
+            String name = signature.getDeclaringTypeName() + signature.getName();
+            svc = VerifyUtil.toMD5(name).substring(0,10);
+        }
+
         this.backend.onConsumed(svc, message,
                 () -> {
                     try {
                         proceedingJoinPoint.proceed();
-
                     } catch (Throwable e) {
                         throw new RuntimeException(ExceptionUtil.getMessage(e));
                     }
@@ -66,4 +75,5 @@ public class ReliableOnConsumedAspect {
         );
 
     }
+
 }

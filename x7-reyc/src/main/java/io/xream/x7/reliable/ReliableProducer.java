@@ -25,8 +25,11 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD})
 public @interface ReliableProducer {
 
-    boolean isTcc() default false;
+    boolean useTcc() default false;
     String topic() default "";
     Class<?> type()  default Void.class;
     String[] svcs() default {};
+    int maxRetry() default 0;
+    boolean async() default false;
+    boolean underConstruction() default false;
 }

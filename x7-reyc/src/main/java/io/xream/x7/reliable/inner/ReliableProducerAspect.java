@@ -20,6 +20,7 @@ import io.xream.x7.reliable.MessageTracing;
 import io.xream.x7.reliable.ReliableProducer;
 import io.xream.x7.reliable.api.ReliableBackend;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.Signature;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
@@ -27,9 +28,13 @@ import org.aspectj.lang.reflect.MethodSignature;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import x7.core.exception.BusyException;
 import x7.core.util.ExceptionUtil;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 
 @Aspect
@@ -53,6 +58,8 @@ public class ReliableProducerAspect {
     @Around("cut() && @annotation(reliableProducer) ")
     public Object around(ProceedingJoinPoint proceedingJoinPoint, ReliableProducer reliableProducer) {
 
+        long startTime = System.currentTimeMillis();
+
         Object[] args = proceedingJoinPoint.getArgs();
         Object body = null;
         for (Object arg : args) {
@@ -73,8 +80,31 @@ public class ReliableProducerAspect {
             }
         }
 
+        int maxRetry = reliableProducer.maxRetry();
+
+
+        if (reliableProducer.useTcc()){
+            maxRetry = maxRetry > 3 ? 3 : maxRetry;
+        }else {
+            maxRetry = maxRetry < 3 ? 3 : maxRetry;
+        }
+
+        String msgId = UUID.randomUUID().toString().replace("-","");
+
+        String[] svcs = reliableProducer.svcs();
+        for (String svc : svcs){
+            if (svc.contains(",")) {
+                Signature signature = proceedingJoinPoint.getSignature();
+                String str = signature.getDeclaringTypeName() + "."+ signature.getName();
+                throw new RuntimeException(str + ", " + ReliableProducer.class.getName() + ", wrong service-name: " + svc);
+            }
+        }
+
         Object result = this.backend.produceReliably(
-                reliableProducer.isTcc(),//
+                msgId,//
+                reliableProducer.useTcc(),//
+                maxRetry,//
+                reliableProducer.underConstruction(),//
                 reliableProducer.topic(),//
                 body,//
                 tracing,//
@@ -95,6 +125,49 @@ public class ReliableProducerAspect {
                 }
         );
 
-        return result;
+
+        if (reliableProducer.async() && ! reliableProducer.useTcc())
+            return result;
+
+        boolean isOk = false;
+        int maxReplay = 3;
+        long duration = 15;
+        int replay = 0;
+        while (replay < maxReplay)
+        {
+            try {
+                TimeUnit.MILLISECONDS.sleep(duration);
+                isOk = this.backend.check(msgId);
+                if (isOk) {
+                  logger.info("handled OK time: {} ,replay = {} ,for {}" , System.currentTimeMillis() - startTime , replay ,proceedingJoinPoint.getSignature());
+                  return result;
+                }
+                replay++;
+            }catch (Exception e) {
+                break;
+            }
+        }
+
+        maxRetry = 6;
+
+        duration = 1000;
+        maxReplay = replay + maxRetry;
+        while (replay < maxReplay)
+        {
+            try {
+                TimeUnit.MILLISECONDS.sleep(duration);
+                isOk = this.backend.check(msgId);
+                if (isOk) {
+                    logger.info("handled OK, time: {} ,replay = {} ,for {}" , System.currentTimeMillis() - startTime , replay ,proceedingJoinPoint.getSignature());
+                    return result;
+                }
+                replay++;
+            }catch (Exception e) {
+                break;
+            }
+        }
+        logger.info("handled FAIL, time: {} ,replay = {} ,for {}" , System.currentTimeMillis() - startTime , replay ,proceedingJoinPoint.getSignature());
+        throw  new BusyException("TIMEOUT, X TRANSACTION UN FINISHED");
     }
+
 }

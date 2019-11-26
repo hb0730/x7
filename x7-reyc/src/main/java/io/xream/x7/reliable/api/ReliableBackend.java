@@ -28,19 +28,21 @@ import java.util.concurrent.Callable;
 public interface ReliableBackend {
 
     /**
-     * @param isTcc
+     * @param useTcc
      * as regards to TCC, TCC implemented to check all resources, <br>
      *     at first, produce 'TOPIC'_TCC_TRY <br>
      *     if all resouces ok, produce 'TOPIC'_TCC_CONFIRM <br>
      *     any exception occured, produce 'TOPIC'_TCC_CANCEL <br>
      *     anyway, when isTcc = true, has to prepare 3 listeners to listener<br>
+     * @param maxRetry message maxRetry
+     * @param underConstruction message underConstruction
      * @param topic message topic
      * @param body  message body
      * @param messageTracing getMsgId(), set tracingId
      * @param svcs  the nameList of other listening domain service
      * @param callable  the service or controller handle the bisiness
      */
-    Object produceReliably(Boolean isTcc, String topic, Object body, MessageTracing messageTracing, String[] svcs, Callable callable);
+    Object produceReliably(String id, Boolean useTcc, int maxRetry, boolean underConstruction, String topic, Object body, MessageTracing messageTracing, String[] svcs, Callable callable);
 
     /**
      *
@@ -49,4 +51,6 @@ public interface ReliableBackend {
      * @param runnable  listener handle the bisiness
      */
     void onConsumed(String svc, Object message, Runnable runnable);
+
+    boolean check(String msgId);
 }
