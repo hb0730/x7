@@ -42,7 +42,7 @@ public interface ReliableBackend {
      * @param svcs  the nameList of other listening domain service
      * @param callable  the service or controller handle the bisiness
      */
-    Object produceReliably(String id, Boolean useTcc, int maxRetry, boolean underConstruction, String topic, Object body, MessageTracing messageTracing, String[] svcs, Callable callable);
+    Object produceReliably(Boolean useTcc, String id, int maxRetry, boolean underConstruction, String topic, Object body, MessageTracing messageTracing, String[] svcs, Callable callable);
 
     /**
      *
@@ -51,6 +51,7 @@ public interface ReliableBackend {
      * @param runnable  listener handle the bisiness
      */
     void onConsumed(String svc, Object message, Runnable runnable);
+    boolean createNext(String id, int maxRetry, String nextTopic, Object nextBody, MessageTracing tracing);
 
     /**
      * TCC
@@ -63,4 +64,5 @@ public interface ReliableBackend {
      * @param msgId
      */
     boolean cancel(String msgId);
+
 }

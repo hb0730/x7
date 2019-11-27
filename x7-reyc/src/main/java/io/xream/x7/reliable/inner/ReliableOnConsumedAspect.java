@@ -16,6 +16,7 @@
  */
 package io.xream.x7.reliable.inner;
 
+import io.xream.x7.reliable.MessageTracing;
 import io.xream.x7.reliable.ReliableOnConsumed;
 import io.xream.x7.reliable.api.ReliableBackend;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -56,18 +57,36 @@ public class ReliableOnConsumedAspect {
         Object[] args = proceedingJoinPoint.getArgs();
         Object message = args[0];
 
-        String svc = reliableOnConsumed.svc();
+        Signature signature = proceedingJoinPoint.getSignature();
+        String logStr = signature.getDeclaringTypeName() + "." + signature.getName();
+        if ( ! (message instanceof MessageTracing)) {
+            throw new IllegalArgumentException(logStr + ", message is not instanceof io.xream.x7.reliable.MessageTracing: " + message);
+        }
 
+        String svc = reliableOnConsumed.svc();
         if (StringUtil.isNullOrEmpty(svc)){
-            Signature signature = proceedingJoinPoint.getSignature();
-            String name = signature.getDeclaringTypeName() + signature.getName();
-            svc = VerifyUtil.toMD5(name).substring(0,10);
+            svc = VerifyUtil.toMD5(logStr).substring(0,10);
         }
 
         this.backend.onConsumed(svc, message,
                 () -> {
                     try {
-                        proceedingJoinPoint.proceed();
+                        MethodSignature ms = ((MethodSignature) signature);
+                        if (ms.getReturnType() == void.class) {
+                            proceedingJoinPoint.proceed();
+                        } else {
+                            Object nextBody = proceedingJoinPoint.proceed();
+                            String nextTopic = reliableOnConsumed.nextTopic();
+                            String id = MessageIdGenerator.get();
+                            int maxTry = reliableOnConsumed.maxRetryNext();
+                            if (StringUtil.isNotNull(nextTopic)){
+                                MessageTracing tracing = (MessageTracing)message;
+                                boolean flag = this.backend.createNext(id,maxTry,nextTopic,nextBody,tracing);
+                                if (!flag){
+                                    throw new RuntimeException(logStr + ", produce next topic failed: topic: " + nextTopic + ", message:"+ message + ",next body: " + nextBody);
+                                }
+                            }
+                        }
                     } catch (Throwable e) {
                         throw new RuntimeException(ExceptionUtil.getMessage(e));
                     }

@@ -19,4 +19,5 @@ package io.xream.x7.reliable;
 public interface MessageTracing {
 
     String getTracingId();
+    String getParentId();
 }

@@ -14,22 +14,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.xream.x7.reliable;
+package io.xream.x7.reliable.inner;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.UUID;
 
-@Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD})
-public @interface ReliableOnConsumed {
+public class MessageIdGenerator {
 
-    String svc() default "";
-
-    /**
-     * next produce
-     */
-    String nextTopic() default "";
-    int maxRetryNext() default 0;
+    protected static String get(){
+        return UUID.randomUUID().toString().replace("-","");
+    }
 }

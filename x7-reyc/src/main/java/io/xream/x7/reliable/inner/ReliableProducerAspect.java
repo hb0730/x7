@@ -92,7 +92,7 @@ public class ReliableProducerAspect {
             maxRetry = maxRetry < 3 ? 3 : maxRetry;
         }
 
-        final String msgId = UUID.randomUUID().toString().replace("-","");
+        final String msgId = MessageIdGenerator.get();
 
         String[] svcs = reliableProducer.svcs();
         for (String svc : svcs){
@@ -102,8 +102,8 @@ public class ReliableProducerAspect {
         }
 
         Object result = this.backend.produceReliably(
-                msgId,//
                 reliableProducer.useTcc(),//
+                msgId,//
                 maxRetry,//
                 reliableProducer.underConstruction(),//
                 reliableProducer.topic(),//
