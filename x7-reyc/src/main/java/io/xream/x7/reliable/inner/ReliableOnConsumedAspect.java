@@ -59,9 +59,6 @@ public class ReliableOnConsumedAspect {
 
         Signature signature = proceedingJoinPoint.getSignature();
         String logStr = signature.getDeclaringTypeName() + "." + signature.getName();
-        if ( ! (message instanceof MessageTracing)) {
-            throw new IllegalArgumentException(logStr + ", message is not instanceof io.xream.x7.reliable.MessageTracing: " + message);
-        }
 
         String nextTopic = reliableOnConsumed.nextTopic();
         String[] svcs = reliableOnConsumed.svcsNext();
@@ -87,8 +84,7 @@ public class ReliableOnConsumedAspect {
                             String id = MessageIdGenerator.get();
                             int maxTry = reliableOnConsumed.maxRetryNext();
                             if (StringUtil.isNotNull(nextTopic)){
-                                MessageTracing tracing = (MessageTracing)message;
-                                boolean flag = this.backend.createNext(id,maxTry,nextTopic,nextBody,tracing,svcs);
+                                boolean flag = this.backend.createNext(id,maxTry,nextTopic,nextBody,message,svcs);
                                 if (!flag){
                                     throw new RuntimeException(logStr + ", produce next topic failed: topic: " + nextTopic + ", message:"+ message + ",next body: " + nextBody);
                                 }

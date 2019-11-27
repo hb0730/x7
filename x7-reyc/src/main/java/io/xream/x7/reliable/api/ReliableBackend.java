@@ -51,7 +51,7 @@ public interface ReliableBackend {
      * @param runnable  listener handle the bisiness
      */
     void onConsumed(String svc, Object message, Runnable runnable);
-    boolean createNext(String id, int maxRetry, String nextTopic, Object nextBody, MessageTracing tracing, String[] svcs);
+    boolean createNext(String id, int maxRetry, String nextTopic, Object nextBody, Object preMessage, String[] svcs);
 
     /**
      * TCC
