@@ -52,5 +52,15 @@ public interface ReliableBackend {
      */
     void onConsumed(String svc, Object message, Runnable runnable);
 
-    boolean check(String msgId);
+    /**
+     * TCC
+     * @param msgId
+     */
+    boolean tryToConfirm(String msgId);
+
+    /**
+     * TCC
+     * @param msgId
+     */
+    boolean cancel(String msgId);
 }

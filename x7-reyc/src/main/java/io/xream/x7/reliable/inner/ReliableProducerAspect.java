@@ -69,8 +69,11 @@ public class ReliableProducerAspect {
             }
         }
 
+        Signature signature = proceedingJoinPoint.getSignature();
+        String str = signature.getDeclaringTypeName() + "."+ signature.getName();
+
         if (body == null)
-            throw new RuntimeException("ReliableMessage No Body: " + Arrays.asList(proceedingJoinPoint.getArgs()));
+            throw new IllegalArgumentException(str + ", ReliableMessage arg can not be null, type: " + reliableProducer.type());
 
         MessageTracing tracing = null;
         for (Object arg : args) {
@@ -89,14 +92,12 @@ public class ReliableProducerAspect {
             maxRetry = maxRetry < 3 ? 3 : maxRetry;
         }
 
-        String msgId = UUID.randomUUID().toString().replace("-","");
+        final String msgId = UUID.randomUUID().toString().replace("-","");
 
         String[] svcs = reliableProducer.svcs();
         for (String svc : svcs){
             if (svc.contains(",")) {
-                Signature signature = proceedingJoinPoint.getSignature();
-                String str = signature.getDeclaringTypeName() + "."+ signature.getName();
-                throw new RuntimeException(str + ", " + ReliableProducer.class.getName() + ", wrong service-name: " + svc);
+                throw new IllegalArgumentException(str + ", " + ReliableProducer.class.getName() + ", svcs: " + svcs);
             }
         }
 
@@ -111,7 +112,6 @@ public class ReliableProducerAspect {
                 reliableProducer.svcs(),//
                 () -> {
                     try {
-                        org.aspectj.lang.Signature signature = proceedingJoinPoint.getSignature();
                         MethodSignature ms = ((MethodSignature) signature);
                         if (ms.getReturnType() == void.class) {
                             proceedingJoinPoint.proceed();
@@ -125,7 +125,6 @@ public class ReliableProducerAspect {
                 }
         );
 
-
         if (reliableProducer.async() && ! reliableProducer.useTcc())
             return result;
 
@@ -137,7 +136,7 @@ public class ReliableProducerAspect {
         {
             try {
                 TimeUnit.MILLISECONDS.sleep(duration);
-                isOk = this.backend.check(msgId);
+                isOk = this.backend.tryToConfirm(msgId);
                 if (isOk) {
                   logger.info("handled OK time: {} ,replay = {} ,for {}" , System.currentTimeMillis() - startTime , replay ,proceedingJoinPoint.getSignature());
                   return result;
@@ -149,14 +148,13 @@ public class ReliableProducerAspect {
         }
 
         maxRetry = 6;
-
         duration = 1000;
         maxReplay = replay + maxRetry;
         while (replay < maxReplay)
         {
             try {
                 TimeUnit.MILLISECONDS.sleep(duration);
-                isOk = this.backend.check(msgId);
+                isOk = this.backend.tryToConfirm(msgId);
                 if (isOk) {
                     logger.info("handled OK, time: {} ,replay = {} ,for {}" , System.currentTimeMillis() - startTime , replay ,proceedingJoinPoint.getSignature());
                     return result;
@@ -166,8 +164,14 @@ public class ReliableProducerAspect {
                 break;
             }
         }
-        logger.info("handled FAIL, time: {} ,replay = {} ,for {}" , System.currentTimeMillis() - startTime , replay ,proceedingJoinPoint.getSignature());
-        throw  new BusyException("TIMEOUT, X TRANSACTION UN FINISHED");
+
+        if (reliableProducer.useTcc()) {
+            this.backend.cancel(msgId);
+            logger.info("handled FAIL, time: {} ,replay = {} ,for {}" , System.currentTimeMillis() - startTime , replay ,proceedingJoinPoint.getSignature());
+            throw new BusyException("TIMEOUT, X TRANSACTION UN FINISHED");
+        }
+
+        return result;
     }
 
 }
