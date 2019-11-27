@@ -63,6 +63,14 @@ public class ReliableOnConsumedAspect {
             throw new IllegalArgumentException(logStr + ", message is not instanceof io.xream.x7.reliable.MessageTracing: " + message);
         }
 
+        String nextTopic = reliableOnConsumed.nextTopic();
+        String[] svcs = reliableOnConsumed.svcsNext();
+        if (StringUtil.isNotNull(nextTopic)){
+            if (svcs == null || svcs.length == 0){
+                throw new IllegalArgumentException(logStr + ", if config nextTopic, svcs of io.xream.x7.reliable.ReliableOnConsumed can not null, nextTopic: " + nextTopic);
+            }
+        }
+
         String svc = reliableOnConsumed.svc();
         if (StringUtil.isNullOrEmpty(svc)){
             svc = VerifyUtil.toMD5(logStr).substring(0,10);
@@ -76,12 +84,11 @@ public class ReliableOnConsumedAspect {
                             proceedingJoinPoint.proceed();
                         } else {
                             Object nextBody = proceedingJoinPoint.proceed();
-                            String nextTopic = reliableOnConsumed.nextTopic();
                             String id = MessageIdGenerator.get();
                             int maxTry = reliableOnConsumed.maxRetryNext();
                             if (StringUtil.isNotNull(nextTopic)){
                                 MessageTracing tracing = (MessageTracing)message;
-                                boolean flag = this.backend.createNext(id,maxTry,nextTopic,nextBody,tracing);
+                                boolean flag = this.backend.createNext(id,maxTry,nextTopic,nextBody,tracing,svcs);
                                 if (!flag){
                                     throw new RuntimeException(logStr + ", produce next topic failed: topic: " + nextTopic + ", message:"+ message + ",next body: " + nextBody);
                                 }

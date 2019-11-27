@@ -32,4 +32,9 @@ public @interface ReliableOnConsumed {
      */
     String nextTopic() default "";
     int maxRetryNext() default 0;
+
+    /**
+     *  Atleast one svc need, to confirm consumed ok,
+     */
+    String[] svcsNext() default {};
 }
