@@ -31,10 +31,10 @@ public @interface ReliableOnConsumed {
      * next produce
      */
     String nextTopic() default "";
-    int maxRetryNext() default 0;
+    int nextMaxRetry() default 0;
 
     /**
      *  Atleast one svc need, to confirm consumed ok,
      */
-    String[] svcsNext() default {};
+    String[] nextSvcs() default {};
 }

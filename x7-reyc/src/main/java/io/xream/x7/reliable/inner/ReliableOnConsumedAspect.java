@@ -61,7 +61,7 @@ public class ReliableOnConsumedAspect {
         String logStr = signature.getDeclaringTypeName() + "." + signature.getName();
 
         String nextTopic = reliableOnConsumed.nextTopic();
-        String[] svcs = reliableOnConsumed.svcsNext();
+        String[] svcs = reliableOnConsumed.nextSvcs();
         if (StringUtil.isNotNull(nextTopic)){
             if (svcs == null || svcs.length == 0){
                 throw new IllegalArgumentException(logStr + ", if config nextTopic, svcs of io.xream.x7.reliable.ReliableOnConsumed can not null, nextTopic: " + nextTopic);
@@ -82,7 +82,7 @@ public class ReliableOnConsumedAspect {
                         } else {
                             Object nextBody = proceedingJoinPoint.proceed();
                             String id = MessageIdGenerator.get();
-                            int maxTry = reliableOnConsumed.maxRetryNext();
+                            int maxTry = reliableOnConsumed.nextMaxRetry();
                             if (StringUtil.isNotNull(nextTopic)){
                                 boolean flag = this.backend.createNext(id,maxTry,nextTopic,nextBody,message,svcs);
                                 if (!flag){
