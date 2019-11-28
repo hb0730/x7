@@ -1,7 +1,6 @@
 package io.xream.x7.reyc.internal;
 
 import org.springframework.beans.factory.annotation.Value;
-
 import org.springframework.context.annotation.Configuration;
 
 @Configuration

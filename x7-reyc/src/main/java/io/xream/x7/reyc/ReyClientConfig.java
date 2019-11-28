@@ -18,8 +18,8 @@ package io.xream.x7.reyc;
 
 import com.github.kristofa.brave.httpclient.BraveHttpRequestInterceptor;
 import com.github.kristofa.brave.httpclient.BraveHttpResponseInterceptor;
-import io.xream.x7.reyc.internal.HttpClientResolver;
 import io.xream.x7.reyc.internal.HttpClientProperies;
+import io.xream.x7.reyc.internal.HttpClientResolver;
 import io.xream.x7.reyc.internal.ReyClientProperties;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
