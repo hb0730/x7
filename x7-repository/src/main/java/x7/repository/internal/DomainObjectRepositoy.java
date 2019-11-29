@@ -20,7 +20,6 @@ import x7.core.bean.*;
 import x7.core.bean.condition.InCondition;
 import x7.core.repository.X;
 import x7.core.util.ExceptionUtil;
-import x7.repository.ManuRepository;
 import x7.repository.Repository;
 
 import java.lang.reflect.Field;

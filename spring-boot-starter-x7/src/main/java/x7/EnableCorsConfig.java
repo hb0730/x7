@@ -18,14 +18,13 @@ package x7;
 
 import org.springframework.context.annotation.Import;
 import x7.core.web.CorsConfig;
-import x7.core.web.CorsRegistrar;
 
 import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({CorsRegistrar.class, CorsConfig.class})
+@Import({CorsConfig.class})
 public @interface EnableCorsConfig {
 
 

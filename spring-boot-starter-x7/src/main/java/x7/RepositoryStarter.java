@@ -19,17 +19,12 @@ package x7;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import x7.core.config.ConfigAdapter;
@@ -53,20 +48,18 @@ import x7.repository.transform.DataTransform;
 import x7.repository.transform.SqlDataTransform;
 import x7.repository.util.ResultSetUtil;
 
-import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.util.Objects;
 
 @EnableConfigurationProperties({
         DataSourceProperties_R.class})
-public class RepositoryStarter  implements ApplicationContextAware {
+public class RepositoryStarter  {
 
     private Logger logger = LoggerFactory.getLogger(RepositoryStarter.class);
 
-    private ApplicationContext applicationContext;
 
     @Bean
-    @Order(1)
+    @Order(2)
     public Mapper.Dialect dialect(Environment environment){
         String driverClassName = environment.getProperty("spring.datasource.driver-class-name");
 
@@ -96,7 +89,7 @@ public class RepositoryStarter  implements ApplicationContextAware {
     }
 
     @Bean
-    @Order(2)
+    @Order(3)
     public CriteriaParser criteriaParser(Mapper.Dialect dialect,Environment environment) {
 
         String driverClassName = environment.getProperty("spring.datasource.driver-class-name");
@@ -114,7 +107,7 @@ public class RepositoryStarter  implements ApplicationContextAware {
 
 
     @Bean
-    @Order(3)
+    @Order(4)
     public Dao dao(Mapper.Dialect dialect,CriteriaParser criteriaParser,Environment environment){
 
         String driverClassName = environment.getProperty("spring.datasource.driver-class-name");
@@ -132,11 +125,8 @@ public class RepositoryStarter  implements ApplicationContextAware {
     }
 
     @Bean
-    @Order(4)
-    public CacheResolver cacheResolver(){
-
-        RedisTemplate redisTemplate = this.applicationContext.getBean(RedisTemplate.class);
-        StringRedisTemplate stringRedisTemplate = this.applicationContext.getBean(StringRedisTemplate.class);
+    @Order(5)
+    public CacheResolver cacheResolver(StringRedisTemplate stringRedisTemplate){
 
         DefaultL2CacheStoragePolicy cacheStoragePolicy = new DefaultL2CacheStoragePolicy();
         cacheStoragePolicy.setStringRedisTemplate(stringRedisTemplate);
@@ -147,7 +137,7 @@ public class RepositoryStarter  implements ApplicationContextAware {
     }
 
     @Bean
-    @Order(5)
+    @Order(6)
     public IdGeneratorPolicy idGeneratorPolicy(StringRedisTemplate stringRedisTemplate){
         DefaultIdGeneratorPolicy defaultIdGeneratorPolicy =  new DefaultIdGeneratorPolicy();
         defaultIdGeneratorPolicy.setStringRedisTemplate(stringRedisTemplate);
@@ -155,7 +145,7 @@ public class RepositoryStarter  implements ApplicationContextAware {
     }
 
     @Bean
-    @Order(6)
+    @Order(7)
     public Repository.IdGenerator idGenerator(IdGeneratorPolicy policy){
         DefaultIdGenerator idGenerator = new DefaultIdGenerator();
         idGenerator.setIdGeneratorPolicy(policy);
@@ -163,7 +153,7 @@ public class RepositoryStarter  implements ApplicationContextAware {
     }
 
     @Bean
-    @Order(7)
+    @Order(8)
     public Repository dataRepository(Dao dao, CacheResolver cacheResolver,Environment environment){
 
         String driverClassName = environment.getProperty("spring.datasource.driver-class-name");
@@ -185,7 +175,7 @@ public class RepositoryStarter  implements ApplicationContextAware {
 
 
     @Bean
-    @Order(8)
+    @Order(9)
     public DomainObjectRepositoy domainObjectRepositoy(Repository repository) {
         DomainObjectRepositoy domainObjectRepositoy = new DomainObjectRepositoy();
         domainObjectRepositoy.setRepository(repository);
@@ -194,7 +184,7 @@ public class RepositoryStarter  implements ApplicationContextAware {
 
     @ConditionalOnMissingBean(X7Data.class)
     @Bean
-    @Order(9)
+    @Order(10)
     public X7Data enableData(DataSource dataSource, DataSourceProperties dataSourceProperties, DataSourceProperties_R dataSourceProperties_r,Environment env,
                              StringRedisTemplate stringRedisTemplate){
 
@@ -220,7 +210,7 @@ public class RepositoryStarter  implements ApplicationContextAware {
 
     @ConditionalOnMissingBean(TxConfig.class)
     @Bean
-    @Order(10)
+    @Order(11)
     public TxConfig txConfig(DataSourceTransactionManager dstm){
         return new TxConfig(dstm);
     }
@@ -298,8 +288,4 @@ public class RepositoryStarter  implements ApplicationContextAware {
         ResultSetUtil.dialect = dialect;
     }
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        this.applicationContext = applicationContext;
-    }
 }

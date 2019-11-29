@@ -20,7 +20,6 @@ import x7.core.bean.Criteria.ResultMappedCriteria;
 import x7.core.bean.Criteria.X;
 import x7.core.util.BeanMapUtil;
 import x7.core.util.BeanUtilX;
-import x7.core.util.NumberUtil;
 import x7.core.util.StringUtil;
 import x7.core.web.Direction;
 import x7.core.web.Fetched;

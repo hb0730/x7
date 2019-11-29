@@ -16,11 +16,8 @@
  */
 package x7.core.bean;
 
-import com.alibaba.fastjson.JSON;
 import x7.core.util.ExceptionUtil;
 import x7.core.util.JsonX;
-
-import java.util.Objects;
 
 public class GenericObject<T> {
 

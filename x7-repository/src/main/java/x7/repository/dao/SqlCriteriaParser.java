@@ -22,12 +22,10 @@ import x7.core.util.BeanUtil;
 import x7.core.util.BeanUtilX;
 import x7.core.util.StringUtil;
 import x7.core.web.Direction;
-import x7.core.web.Viewable;
 import x7.repository.CriteriaParser;
 import x7.repository.SqlParsed;
 import x7.repository.mapper.Mapper;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;

@@ -19,7 +19,6 @@ package x7.core.bean;
 import x7.core.web.Direction;
 
 import java.io.Serializable;
-import java.util.List;
 
 public class Sort implements Serializable {
     private static final long serialVersionUID = 7492946384236689679L;

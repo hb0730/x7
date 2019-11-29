@@ -17,14 +17,13 @@
 package x7;
 
 import org.springframework.context.annotation.Import;
-import x7.repository.dao.TxConfig;
 
 import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 @Documented
-@Import({ParserStarter.class, RepositoryBeanRegistrar.class, RepositoryStarter.class})
+@Import({X7Env.class, ParserStarter.class, RepositoryBeanRegistrar.class, RepositoryStarter.class})
 public @interface EnableX7Repository {
 
     /**

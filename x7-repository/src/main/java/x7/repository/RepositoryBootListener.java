@@ -20,9 +20,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import x7.core.async.CasualWorker;
 import x7.repository.id.IdGeneratorPolicy;
 
-import javax.sql.DataSource;
 import java.util.List;
-import java.util.Objects;
 
 
 public class RepositoryBootListener {

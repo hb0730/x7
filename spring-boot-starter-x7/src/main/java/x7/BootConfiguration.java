@@ -16,11 +16,19 @@
  */
 package x7;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 
-@Configuration
-public class BootConfiguration {
 
+@Configuration
+public class BootConfiguration  {
+
+    @ConditionalOnMissingBean(X7Env.class)
+    @Bean
+    public X7Env x7Env(){
+        return new X7Env();
+    }
 
 }

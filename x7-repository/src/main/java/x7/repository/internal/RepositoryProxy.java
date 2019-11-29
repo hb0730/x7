@@ -17,7 +17,6 @@
 package x7.repository.internal;
 
 import org.springframework.beans.factory.FactoryBean;
-import x7.repository.BaseRepository;
 import x7.repository.Repository;
 
 import java.lang.reflect.Proxy;
