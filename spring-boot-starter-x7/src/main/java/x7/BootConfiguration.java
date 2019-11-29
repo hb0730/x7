@@ -16,33 +16,11 @@
  */
 package x7;
 
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
-import org.springframework.core.env.Environment;
-import x7.config.SpringHelper;
 
 
 @Configuration
 public class BootConfiguration {
-
-    @ConditionalOnMissingBean(SpringHelper.class)
-    @Bean
-    @Order(1)
-    public SpringHelper enableHelper(){
-        return new SpringHelper();
-    }
-
-    @ConditionalOnMissingBean(X7Env.class)
-    @Bean
-    @Order(2)
-    public X7Env enableX7Env(Environment environment) {
-
-        new X7ConfigStarter(environment);
-
-        return new X7Env();
-    }
 
 
 }

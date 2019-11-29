@@ -7,7 +7,6 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.context.annotation.Configuration;
-import x7.config.SpringHelper;
 import x7.core.util.ExceptionUtil;
 import x7.core.util.TimeUtil;
 import x7.core.web.ViewEntity;
@@ -55,14 +54,12 @@ public class WebAop {
 
 		org.aspectj.lang.Signature signature = proceedingJoinPoint.getSignature();
 		MethodSignature ms = ((MethodSignature) signature);
-		final String mapping = SpringHelper.getRequestMapping(ms.getMethod());
 
 
 		{
 			/*
 			 * TX
 			 */
-			System.out.println("_______Transaction begin ....by request: " + mapping);
 			long startTime = TimeUtil.now();
 			Tx.begin();
 			try {
@@ -96,8 +93,6 @@ public class WebAop {
 
 				String msg = ExceptionUtil.getMessage(e);
 
-				System.out.println("_______GOT EXCEIPTION ....by request: " + mapping + "  ....:" + msg);
-				System.out.println("_______ROLL BACKED ....by request: " + mapping);
 
 				return ViewEntity.toast(msg);
 			}

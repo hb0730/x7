@@ -12,7 +12,6 @@ public class CorsConfig  {
     @Bean
     public CorsFilter corsFilter(){
         CorsFilter corsFilter =  new CorsFilter();
-        corsFilter.setKey(CorsRegistrar.key);
         return corsFilter;
     }
 

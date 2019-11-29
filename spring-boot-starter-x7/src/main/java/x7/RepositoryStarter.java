@@ -19,23 +19,25 @@ package x7;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.data.redis.core.StringRedisTemplate;
-import x7.config.SpringHelper;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import x7.core.config.ConfigAdapter;
-import x7.core.config.Configs;
 import x7.core.repository.CacheResolver;
 import x7.distributed.LockStorage;
 import x7.repository.*;
-import x7.repository.cache.DefaultL2CacheStoragePolicy;
 import x7.repository.cache.DefaultL2CacheResolver;
+import x7.repository.cache.DefaultL2CacheStoragePolicy;
 import x7.repository.dao.Dao;
 import x7.repository.dao.DaoImpl;
 import x7.repository.dao.SqlCriteriaParser;
+import x7.repository.dao.TxConfig;
 import x7.repository.id.DefaultIdGenerator;
 import x7.repository.id.DefaultIdGeneratorPolicy;
 import x7.repository.id.IdGeneratorPolicy;
@@ -51,29 +53,17 @@ import java.util.Objects;
 
 @EnableConfigurationProperties({
         DataSourceProperties_R.class})
+
 public class RepositoryStarter  {
 
     private Logger logger = LoggerFactory.getLogger(RepositoryStarter.class);
 
-    @ConditionalOnMissingBean(SpringHelper.class)
+    @Value("${x7.repository.show-sql}")
+    private boolean showSql;
+
+
     @Bean
     @Order(1)
-    public SpringHelper enableHelper(){
-        return new SpringHelper();
-    }
-
-    @ConditionalOnMissingBean(X7Env.class)
-    @Bean
-    @Order(2)
-    public X7Env enableX7Env(Environment environment) {
-
-        new X7ConfigStarter(environment);
-
-        return new X7Env();
-    }
-
-    @Bean
-    @Order(3)
     public Mapper.Dialect dialect(Environment environment){
         String driverClassName = environment.getProperty("spring.datasource.driver-class-name");
 
@@ -103,7 +93,7 @@ public class RepositoryStarter  {
     }
 
     @Bean
-    @Order(4)
+    @Order(2)
     public CriteriaParser criteriaParser(Mapper.Dialect dialect,Environment environment) {
 
         String driverClassName = environment.getProperty("spring.datasource.driver-class-name");
@@ -121,7 +111,7 @@ public class RepositoryStarter  {
 
 
     @Bean
-    @Order(6)
+    @Order(3)
     public Dao dao(Mapper.Dialect dialect,CriteriaParser criteriaParser,Environment environment){
 
         String driverClassName = environment.getProperty("spring.datasource.driver-class-name");
@@ -139,7 +129,7 @@ public class RepositoryStarter  {
     }
 
     @Bean
-    @Order(7)
+    @Order(4)
     public CacheResolver cacheResolver(StringRedisTemplate stringRedisTemplate){
 
         DefaultL2CacheStoragePolicy cacheStoragePolicy = new DefaultL2CacheStoragePolicy();
@@ -151,7 +141,7 @@ public class RepositoryStarter  {
     }
 
     @Bean
-    @Order(8)
+    @Order(5)
     public IdGeneratorPolicy idGeneratorPolicy(StringRedisTemplate stringRedisTemplate){
         DefaultIdGeneratorPolicy defaultIdGeneratorPolicy =  new DefaultIdGeneratorPolicy();
         defaultIdGeneratorPolicy.setStringRedisTemplate(stringRedisTemplate);
@@ -159,7 +149,7 @@ public class RepositoryStarter  {
     }
 
     @Bean
-    @Order(9)
+    @Order(6)
     public Repository.IdGenerator idGenerator(IdGeneratorPolicy policy){
         DefaultIdGenerator idGenerator = new DefaultIdGenerator();
         idGenerator.setIdGeneratorPolicy(policy);
@@ -167,8 +157,8 @@ public class RepositoryStarter  {
     }
 
     @Bean
-    @Order(10)
-    public Repository dataRepository(Dao dao, CacheResolver cacheResolver,IdGeneratorPolicy idGeneratorPolicy,Environment environment){
+    @Order(7)
+    public Repository dataRepository(Dao dao, CacheResolver cacheResolver,Environment environment){
 
         String driverClassName = environment.getProperty("spring.datasource.driver-class-name");
 
@@ -189,7 +179,7 @@ public class RepositoryStarter  {
 
 
     @Bean
-    @Order(11)
+    @Order(8)
     public DomainObjectRepositoy domainObjectRepositoy(Repository repository) {
         DomainObjectRepositoy domainObjectRepositoy = new DomainObjectRepositoy();
         domainObjectRepositoy.setRepository(repository);
@@ -198,8 +188,8 @@ public class RepositoryStarter  {
 
     @ConditionalOnMissingBean(X7Data.class)
     @Bean
-    @Order(12)
-    public X7Data enableData(DataSource dataSource,DataSourceProperties_R dataSourceProperties_r,
+    @Order(9)
+    public X7Data enableData(DataSource dataSource, DataSourceProperties dataSourceProperties, DataSourceProperties_R dataSourceProperties_r,
                              StringRedisTemplate stringRedisTemplate){
 
         DataSource writeDataSource = dataSource;
@@ -209,7 +199,7 @@ public class RepositoryStarter  {
          * 1. 对于Sharding, 可以用动态数据源<br>
          * 2. 只读库，一个请求只需并成一个连接，可绕开事务<br>
          */
-        DataSource readDataSource = getReadDataSource(dataSourceProperties_r);
+        DataSource readDataSource = getReadDataSource(dataSourceProperties,dataSourceProperties_r);
 
         configX7Datasource(writeDataSource, readDataSource);
 
@@ -222,8 +212,15 @@ public class RepositoryStarter  {
         return new X7Data();
     }
 
+    @ConditionalOnMissingBean(TxConfig.class)
+    @Bean
+    @Order(10)
+    public TxConfig txConfig(DataSourceTransactionManager dstm){
+        return new TxConfig(dstm);
+    }
 
-    public HikariDataSource getReadDataSource(DataSourceProperties_R dataSourceProperties_r) {
+
+    public HikariDataSource getReadDataSource(DataSourceProperties dataSourceProperties,DataSourceProperties_R dataSourceProperties_r) {
 
 
         if (Objects.isNull(dataSourceProperties_r.getUrl())) {
@@ -234,9 +231,9 @@ public class RepositoryStarter  {
             return null;
         }
 
-        String driverClassName = Configs.getString("spring.datasource.driver-class-name");
-        String username = Configs.getString("spring.datasource.username");
-        String password = Configs.getString("spring.datasource.password");
+        String driverClassName = dataSourceProperties.determineDriverClassName();
+        String username = dataSourceProperties.getUsername();
+        String password = dataSourceProperties.getPassword();
 
         if (Objects.nonNull(dataSourceProperties_r.getDriverClassName())) {
             driverClassName = dataSourceProperties_r.getDriverClassName();
@@ -267,15 +264,10 @@ public class RepositoryStarter  {
         if (Objects.isNull(dsW))
             throw new RuntimeException("Writeable DataSource Got NULL");
 
-        if (Configs.isTrue("x7.repository.show-sql")
-                || Configs.isTrue("x7.repository.showSql")
-                || Configs.isTrue("spring.jpa.show-sql")
-                || "debug".equals(Configs.getString("log4j.logger.org.springframework.jdbc.core.JdbcTemplate"))
-                || "info".equals(Configs.getString("log4j.logger.org.springframework.jdbc.core.JdbcTemplate"))
-        ) {
+        if (showSql) {
             ConfigAdapter.setIsShowSql(true);
         }else{
-            logger.info("X7 Repsository will not show SQL, for no config like one of: x7.repository.show-sql=true,spring.jpa.show-sql=true,log4j.logger.org....." );
+            logger.info("X7 Repsository will not show SQL, for no config like one of: x7.repository.show-sql=true" );
         }
 
         DataSourceSetter.set(dsW, dsR);

@@ -22,13 +22,11 @@ import org.slf4j.LoggerFactory;
 import x7.core.bean.*;
 import x7.core.bean.condition.InCondition;
 import x7.core.bean.condition.RefreshCondition;
-import x7.core.config.Configs;
 import x7.core.repository.CacheResolver;
 import x7.core.repository.X;
 import x7.core.util.BeanUtilX;
 import x7.core.util.JsonX;
 import x7.core.web.Page;
-import x7.repository.exception.PersistenceException;
 import x7.repository.transform.DataTransform;
 
 import java.lang.reflect.Field;
@@ -60,7 +58,7 @@ public class CacheableRepository implements Repository {
     }
 
     private boolean isNoCache() {
-        return Configs.Inner.isDev || !cacheResolver.isEnabled();
+        return !cacheResolver.isEnabled();
     }
 
     private String getCacheKey(Object obj, Parsed parsed) {

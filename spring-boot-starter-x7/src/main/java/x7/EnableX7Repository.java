@@ -17,6 +17,7 @@
 package x7;
 
 import org.springframework.context.annotation.Import;
+import x7.repository.dao.TxConfig;
 
 import java.lang.annotation.*;
 

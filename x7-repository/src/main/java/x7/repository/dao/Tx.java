@@ -21,7 +21,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.DefaultTransactionDefinition;
-import x7.config.SpringHelper;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -42,6 +41,11 @@ public class Tx {
 
 	private static Map<String, TransactionStatus> map = new ConcurrentHashMap<>();
 
+	private static PlatformTransactionManager tm;
+	protected static void init(DataSourceTransactionManager dstm){
+		tm = dstm;
+	}
+
 	public static String getKey(){
 		long threadId = Thread.currentThread().getId();
 		String key = String.valueOf(threadId);
@@ -53,7 +57,6 @@ public class Tx {
 		DefaultTransactionDefinition def = new DefaultTransactionDefinition();
 		def.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 
-		PlatformTransactionManager tm = SpringHelper.getObject(DataSourceTransactionManager.class);
 		TransactionStatus status = tm.getTransaction(def);
 
 		String key = getKey();
@@ -66,7 +69,6 @@ public class Tx {
 		String key = getKey();
 		TransactionStatus status = map.remove(key);
 
-		PlatformTransactionManager tm = SpringHelper.getObject(DataSourceTransactionManager.class);
 		tm.commit(status);
 	}
 
@@ -75,7 +77,6 @@ public class Tx {
 		String key = getKey();
 		TransactionStatus status = map.remove(key);
 
-		PlatformTransactionManager tm = SpringHelper.getObject(DataSourceTransactionManager.class);
 		tm.rollback(status);
 	}
 }

@@ -28,6 +28,5 @@ import java.lang.annotation.*;
 @Import({CorsRegistrar.class, CorsConfig.class})
 public @interface EnableCorsConfig {
 
-    String key() default "access.domain";
 
 }

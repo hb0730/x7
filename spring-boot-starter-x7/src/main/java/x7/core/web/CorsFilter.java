@@ -1,7 +1,7 @@
 package x7.core.web;
 
 
-import x7.core.config.Configs;
+import org.springframework.beans.factory.annotation.Value;
 import x7.core.util.StringUtil;
 
 import javax.servlet.*;
@@ -10,10 +10,8 @@ import java.io.IOException;
 
 public class CorsFilter implements Filter {
 
-    private String key;
-    public void setKey(String key){
-        this.key = key;
-    }
+    @Value("${access.domain}")
+    private String origins = "*";
 
     @Override
     public void destroy() {
@@ -24,7 +22,6 @@ public class CorsFilter implements Filter {
     public void doFilter(ServletRequest req, ServletResponse res, FilterChain chain)
             throws IOException, ServletException {
 
-        String origins = Configs.getString(key);
         if (StringUtil.isNullOrEmpty(origins)){
             origins = "*";
         }
