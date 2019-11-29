@@ -19,17 +19,22 @@ package x7;
 import com.zaxxer.hikari.HikariDataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import x7.core.config.ConfigAdapter;
 import x7.core.repository.CacheResolver;
+import x7.core.util.StringUtil;
 import x7.distributed.LockStorage;
 import x7.repository.*;
 import x7.repository.cache.DefaultL2CacheResolver;
@@ -48,19 +53,17 @@ import x7.repository.transform.DataTransform;
 import x7.repository.transform.SqlDataTransform;
 import x7.repository.util.ResultSetUtil;
 
+import javax.annotation.Resource;
 import javax.sql.DataSource;
 import java.util.Objects;
 
 @EnableConfigurationProperties({
         DataSourceProperties_R.class})
-
-public class RepositoryStarter  {
+public class RepositoryStarter  implements ApplicationContextAware {
 
     private Logger logger = LoggerFactory.getLogger(RepositoryStarter.class);
 
-    @Value("${x7.repository.show-sql}")
-    private boolean showSql;
-
+    private ApplicationContext applicationContext;
 
     @Bean
     @Order(1)
@@ -130,7 +133,10 @@ public class RepositoryStarter  {
 
     @Bean
     @Order(4)
-    public CacheResolver cacheResolver(StringRedisTemplate stringRedisTemplate){
+    public CacheResolver cacheResolver(){
+
+        RedisTemplate redisTemplate = this.applicationContext.getBean(RedisTemplate.class);
+        StringRedisTemplate stringRedisTemplate = this.applicationContext.getBean(StringRedisTemplate.class);
 
         DefaultL2CacheStoragePolicy cacheStoragePolicy = new DefaultL2CacheStoragePolicy();
         cacheStoragePolicy.setStringRedisTemplate(stringRedisTemplate);
@@ -189,7 +195,7 @@ public class RepositoryStarter  {
     @ConditionalOnMissingBean(X7Data.class)
     @Bean
     @Order(9)
-    public X7Data enableData(DataSource dataSource, DataSourceProperties dataSourceProperties, DataSourceProperties_R dataSourceProperties_r,
+    public X7Data enableData(DataSource dataSource, DataSourceProperties dataSourceProperties, DataSourceProperties_R dataSourceProperties_r,Environment env,
                              StringRedisTemplate stringRedisTemplate){
 
         DataSource writeDataSource = dataSource;
@@ -201,7 +207,7 @@ public class RepositoryStarter  {
          */
         DataSource readDataSource = getReadDataSource(dataSourceProperties,dataSourceProperties_r);
 
-        configX7Datasource(writeDataSource, readDataSource);
+        configX7Datasource(writeDataSource, readDataSource,env);
 
         {//初始化分布式锁
             LockStorage lockStorage = new LockStorage();
@@ -259,11 +265,20 @@ public class RepositoryStarter  {
     }
 
 
-    public void configX7Datasource(DataSource dsW, DataSource dsR) {//FIXME
+    public void configX7Datasource(DataSource dsW, DataSource dsR,Environment env) {//FIXME
 
         if (Objects.isNull(dsW))
             throw new RuntimeException("Writeable DataSource Got NULL");
 
+        String showSqlStr = env.getProperty("x7.repository.show-sql");
+        boolean showSql = false;
+        if (StringUtil.isNotNull(showSqlStr)){
+            try {
+                showSql = Boolean.parseBoolean(showSqlStr);
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+        }
         if (showSql) {
             ConfigAdapter.setIsShowSql(true);
         }else{
@@ -281,5 +296,10 @@ public class RepositoryStarter  {
     private void initDialect(Mapper.Dialect dialect) {
         MapperFactory.Dialect = dialect;
         ResultSetUtil.dialect = dialect;
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        this.applicationContext = applicationContext;
     }
 }
