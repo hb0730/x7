@@ -31,6 +31,5 @@ public class X7ConfigStarter {
 		String[] ativeProfiles = environment.getActiveProfiles();
 
 		ConfigBuilder.build(ativeProfiles);
-
 	}
 }
