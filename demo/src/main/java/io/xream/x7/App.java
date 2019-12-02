@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 import x7.*;
 
+
 /**
  *
  * Demo
@@ -24,6 +25,7 @@ public class App {
     public static void main( String[] args )
     {
     	SpringApplication.run(App.class);
+
     }
 
 

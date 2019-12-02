@@ -38,7 +38,6 @@
             <groupId>io.xream.x7</groupId>
             <artifactId>spring-boot-starter-x7</artifactId>
             <version>${x7.version}</version>
-
         </dependency>
 
         <dependency>
@@ -111,7 +110,7 @@
             <version>${fastjson.version}</version>
         </dependency>
 
-        <!--
+<!--
         <dependency>
             <groupId>com.oracle</groupId>
             <artifactId>ojdbc8</artifactId>
@@ -144,31 +143,7 @@
                     <mainClass>io.xream.x7.App</mainClass>
                 </configuration>
             </plugin>
-            <!--
 
-            <plugin>
-                <groupId>com.spotify</groupId>
-                <artifactId>dockerfile-maven-plugin</artifactId>
-                <version>1.4.9</version>
-                <executions>
-                    <execution>
-                        <id>default</id>
-                        <goals>
-                            <goal>build</goal>
-                            <goal>push</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <finalName>${docker.image.prefix}/${project.artifactId}</finalName>
-                    <tag>latest</tag>
-                    <dockerConfigFile>Dockerfile</dockerConfigFile>
-                    <buildArgs>
-                        <JAR_FILE>target/${project.build.finalName}.jar</JAR_FILE>
-                    </buildArgs>
-                </configuration>
-            </plugin>
--->
         </plugins>
 
     </build>

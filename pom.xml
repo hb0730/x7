@@ -64,8 +64,8 @@
 
     <modules>
         <module>x7-repository</module>
-        <module>spring-boot-starter-x7</module>
         <module>x7-reyc</module>
+        <module>spring-boot-starter-x7</module>
     </modules>
 
     <dependencyManagement>

@@ -80,7 +80,7 @@ public class ReliableProducerAspect {
             }
         }
 
-        int maxRetry = reliableProducer.maxRetry();
+        int maxRetry = reliableProducer.retryMax();
 
 
         if (reliableProducer.useTcc()){

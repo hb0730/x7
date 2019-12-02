@@ -29,7 +29,7 @@ public @interface ReliableProducer {
     String topic() default "";
     Class<?> type()  default Void.class;
     String[] svcs() default {};
-    int maxRetry() default 0;
+    int retryMax() default 0;
     boolean async() default false;
     boolean underConstruction() default false;
 }

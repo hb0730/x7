@@ -31,7 +31,7 @@ public @interface ReliableOnConsumed {
      * next produce
      */
     String nextTopic() default "";
-    int nextMaxRetry() default 0;
+    int nextRetryMax() default 0;
 
     /**
      *  Atleast one svc need, to confirm consumed ok,

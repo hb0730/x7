@@ -81,7 +81,7 @@ public class ReliableOnConsumedAspect {
                         } else {
                             Object nextBody = proceedingJoinPoint.proceed();
                             String id = MessageIdGenerator.get();
-                            int maxTry = reliableOnConsumed.nextMaxRetry();
+                            int maxTry = reliableOnConsumed.nextRetryMax();
                             if (StringUtil.isNotNull(nextTopic)){
                                 boolean flag = this.backend.createNext(id,maxTry,nextTopic,nextBody,message,svcs);
                                 if (!flag){
