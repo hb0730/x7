@@ -17,6 +17,5 @@
 package x7;
 
 public class X7Data {
-
     protected static boolean isEnabled = false;
 }
