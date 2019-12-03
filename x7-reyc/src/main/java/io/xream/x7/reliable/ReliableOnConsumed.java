@@ -37,4 +37,5 @@ public @interface ReliableOnConsumed {
      *  Atleast one svc need, to confirm consumed ok,
      */
     String[] nextSvcs() default {};
+
 }
