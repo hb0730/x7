@@ -34,6 +34,7 @@ public interface ReliableBackend {
      *     if all resouces ok, produce 'TOPIC'_TCC_CONFIRM <br>
      *     any exception occured, produce 'TOPIC'_TCC_CANCEL <br>
      *     anyway, when isTcc = true, has to prepare 3 listeners to listener<br>
+     * @param id framework generate id
      * @param maxRetry message maxRetry
      * @param underConstruction message underConstruction
      * @param topic message topic
