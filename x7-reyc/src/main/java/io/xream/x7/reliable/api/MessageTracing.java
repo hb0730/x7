@@ -16,6 +16,12 @@
  */
 package io.xream.x7.reliable.api;
 
+/**
+ * @author Sim 8966188@qq.com
+ * @apiNote to use @EnableReliabilityManagement, @ReliableProducer and @ReliableOnConsumed, <br>
+ *     reliable center's DTO has to implements MessageTracing <br>
+ *     sql update in order, need getRetryAt() <br>
+ */
 public interface MessageTracing {
 
     String getTracingId();
