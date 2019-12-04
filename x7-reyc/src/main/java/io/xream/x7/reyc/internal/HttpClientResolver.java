@@ -19,6 +19,7 @@ package io.xream.x7.reyc.internal;
 import com.github.kristofa.brave.httpclient.BraveHttpRequestInterceptor;
 import com.github.kristofa.brave.httpclient.BraveHttpResponseInterceptor;
 import io.xream.x7.reyc.*;
+import io.xream.x7.reyc.api.ReyTemplate;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;

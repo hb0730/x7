@@ -23,7 +23,7 @@ import io.github.resilience4j.retry.Retry;
 import io.github.resilience4j.retry.RetryRegistry;
 import io.vavr.control.Try;
 import io.xream.x7.reyc.BackendService;
-import io.xream.x7.reyc.ReyTemplate;
+import io.xream.x7.reyc.api.ReyTemplate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import x7.core.exception.BusyException;

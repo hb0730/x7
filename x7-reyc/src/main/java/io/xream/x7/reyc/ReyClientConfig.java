@@ -18,6 +18,7 @@ package io.xream.x7.reyc;
 
 import com.github.kristofa.brave.httpclient.BraveHttpRequestInterceptor;
 import com.github.kristofa.brave.httpclient.BraveHttpResponseInterceptor;
+import io.xream.x7.reyc.api.ReyTemplate;
 import io.xream.x7.reyc.internal.HttpClientProperies;
 import io.xream.x7.reyc.internal.HttpClientResolver;
 import io.xream.x7.reyc.internal.ReyClientProperties;
@@ -30,7 +31,7 @@ import org.springframework.context.annotation.Import;
 public class ReyClientConfig {
 
 
-    public ReyClientConfig(HttpClientProperies properies, ReyClientProperties reyClientProperties,ReyTemplate reyTemplate){
+    public ReyClientConfig(HttpClientProperies properies, ReyClientProperties reyClientProperties, ReyTemplate reyTemplate){
 
         HttpClientResolver.init(properies, reyClientProperties,reyTemplate);
 
