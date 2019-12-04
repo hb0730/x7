@@ -22,7 +22,7 @@ public interface MessageTracing {
     String getParentId();
 
     /**
-     * scheduling retry <br>
+     * scheduling retry, if (retry < now-duration) <br>
      * order key for update sql, code like: where inverntory.refreshAt < retryAt
      */
     long getRetryAt();
