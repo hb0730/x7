@@ -20,5 +20,10 @@ public interface MessageTracing {
 
     String getTracingId();
     String getParentId();
+
+    /**
+     * scheduling retry <br>
+     * order key for update sql
+     */
     long getRetryAt();
 }
