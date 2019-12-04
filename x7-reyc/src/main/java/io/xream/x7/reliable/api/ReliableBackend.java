@@ -16,8 +16,6 @@
  */
 package io.xream.x7.reliable.api;
 
-import io.xream.x7.reliable.MessageTracing;
-
 import java.util.concurrent.Callable;
 
 /**
