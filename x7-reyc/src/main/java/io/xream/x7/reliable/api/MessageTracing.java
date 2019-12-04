@@ -23,7 +23,7 @@ public interface MessageTracing {
 
     /**
      * scheduling retry <br>
-     * order key for update sql
+     * order key for update sql, code like: where inverntory.refreshAt < retryAt
      */
     long getRetryAt();
 }
