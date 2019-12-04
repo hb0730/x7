@@ -22,7 +22,7 @@ import java.util.concurrent.Callable;
 
 /**
  * @author Sim 8966188@qq.com
- * @apiNote to use @EnableReliableManagement, @ReliableProducer and @ReliableOnConsumed, <br>
+ * @apiNote to use @EnableReliabilityManagement, @ReliableProducer and @ReliableOnConsumed, <br>
  *     has to implements ReliableBackend, develop and deploy 'Reliable Message Center'
  */
 public interface ReliableBackend {
