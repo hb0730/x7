@@ -25,6 +25,11 @@ package io.xream.x7.reliable.api;
 public interface MessageTracing {
 
     String getTracingId();
+
+    /**
+     *
+     * full tx: after finishing all write, then produce next message(if necessary)
+     */
     String getParentId();
 
     /**
