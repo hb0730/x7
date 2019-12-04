@@ -23,7 +23,8 @@ public interface MessageTracing {
 
     /**
      * scheduling retry, if (retry < now-duration) <br>
-     * order key for update sql, code like: where inverntory.refreshAt < retryAt
+     * key for sql update in order, code like: where inverntory.refreshAt < retryAt <br>
+     * not support TCC, if useTcc, no retry, to get the fastest response, code like: create(orderBean) <br>
      */
     long getRetryAt();
 }
