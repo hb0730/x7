@@ -41,7 +41,7 @@ public interface ReliableBackend {
      * @param svcs  the nameList of other listening domain service
      * @param callable  the service or controller handle the bisiness
      */
-    Object produceReliably(Boolean useTcc, String id, int maxRetry, boolean underConstruction, String topic, Object body, MessageTracing messageTracing, String[] svcs, Callable callable);
+    Object produceReliably(Boolean useTcc, String id, int maxRetry, boolean underConstruction, String topic, Object body, MessageTraceable messageTracing, String[] svcs, Callable callable);
 
     /**
      *

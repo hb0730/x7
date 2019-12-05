@@ -19,10 +19,10 @@ package io.xream.x7.reliable.api;
 /**
  * @author Sim 8966188@qq.com
  * @apiNote to use @EnableReliabilityManagement, @ReliableProducer and @ReliableOnConsumed, <br>
- *     reliable center's DTO has to implements MessageTracing <br>
- *     sql update in order, need getRetryAt() <br>
+ *     reliable center's DTO has to implements MessageTraceable <br>
+ *     sql update in order, need getTime() <br>
  */
-public interface MessageTracing {
+public interface MessageTraceable {
 
     String getTracingId();
 
@@ -33,9 +33,9 @@ public interface MessageTracing {
     String getParentId();
 
     /**
-     * scheduling retry, if (retry < now-duration) <br>
-     * key for sql update in order, code like: where inverntory.refreshAt < retryAt <br>
+     * scheduling retry, if (time < now-duration) <br>
+     * key for sql update in order, code like: where inverntory.refreshAt < time <br>
      * not support TCC, if useTcc, no retry, to get the fastest response, code like: create(orderBean) <br>
      */
-    long getRetryAt();
+    long getTime();
 }

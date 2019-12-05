@@ -16,7 +16,7 @@
  */
 package io.xream.x7.reliable.inner;
 
-import io.xream.x7.reliable.api.MessageTracing;
+import io.xream.x7.reliable.api.MessageTraceable;
 import io.xream.x7.reliable.ReliableProducer;
 import io.xream.x7.reliable.api.ReliableBackend;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -72,10 +72,10 @@ public class ReliableProducerAspect {
         if (body == null)
             throw new IllegalArgumentException(str + ", ReliableMessage arg can not be null, type: " + reliableProducer.type());
 
-        MessageTracing tracing = null;
+        MessageTraceable tracing = null;
         for (Object arg : args) {
-            if (arg instanceof MessageTracing) {
-                tracing = (MessageTracing) arg;
+            if (arg instanceof MessageTraceable) {
+                tracing = (MessageTraceable) arg;
                 break;
             }
         }
